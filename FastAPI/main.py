@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 app = FastAPI()
+
+#Url local: http://127.0.0.1:8000
+
 @app.get("/")
 async def root():
     return "Hola FastAPI"
@@ -7,6 +10,8 @@ async def root():
 @app.get("/url")
 async def url():
     return {"url-curso"}
+
+#Url local: http://127.0.0.1:8000/url
 
 #Ó se puede generar este código:
 """ 
@@ -17,5 +22,8 @@ async def root():
     return {"url-curso"}
 
 """
+
+
+
 
 #Para levantar el servidor API uvicorn main:app --reload
