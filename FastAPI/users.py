@@ -11,14 +11,15 @@ app = FastAPI()
 
 #Entidad user
 class User(BaseModel):
+    id: int
     name: str
     surname: str
     url: str
     age: int
 
-users_list = [User(name="Benny", surname="Pérez", url="www.linkedin.com/in/bennyperez", age=36),
-         User(name="Hammer", surname="Vásquez", url="https://sites.google.com/pucp.pe/bennyperez/", age=37),
-         User(name="Jessika", surname="Medina", url="https://www.linkedin.com/in/jessika-milena-medina-suarez/", age=36)]
+users_list = [User(id=1, name="Benny", surname="Pérez", url="www.linkedin.com/in/bennyperez", age=36),
+         User(id=2, name="Hammer", surname="Vásquez", url="https://sites.google.com/pucp.pe/bennyperez/", age=37),
+         User(id=3, name="Jessika", surname="Medina", url="https://www.linkedin.com/in/jessika-milena-medina-suarez/", age=36)]
 
 @app.get("/usersjson")
 async def usersjson():
@@ -30,6 +31,13 @@ async def usersjson():
 async def users():
     return users_list
 
+@app.get("/user/{id}")
+async def user(id: int):
+    users = filter(lambda user: user.id == id, users_list)
+    try:
+        return list(users)[0]
+    except:
+        return "{Error: No se ha encontrado el usuario}"
 
 #Url local: http://127.0.0.1:8000/url
 
