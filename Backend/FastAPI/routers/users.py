@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from pydantic import BaseModel
 
 
-app = FastAPI()
+router = APIRouter()
 
 #Para arrancar el servidor se usa el siguiente comando: python3 -m uvicorn users:app --reload
 
@@ -21,17 +21,17 @@ users_list = [User(id=1, name="Benny", surname="Pérez", url="www.linkedin.com/i
          User(id=2, name="Hammer", surname="Vásquez", url="https://sites.google.com/pucp.pe/bennyperez/", age=37),
          User(id=3, name="Jessika", surname="Medina", url="https://www.linkedin.com/in/jessika-milena-medina-suarez/", age=36)]
 
-@app.get("/usersjson")
+@router.get("/usersjson")
 async def usersjson():
     return [{"name": "Benny", "surname": "Pérez", "url": "www.linkedin.com/in/bennyperez", "age":36},
             {"name": "Hammer", "surname": "Vásquez", "url": "https://sites.google.com/pucp.pe/bennyperez/", "age":37},
             {"name": "Jessika", "surname": "Medina", "url": "https://www.linkedin.com/in/jessika-milena-medina-suarez/", "age":36}]
 
-@app.get("/users")
+@router.get("/users")
 async def users():
     return users_list
 
-@app.get("/user/{id}")
+@router.get("/user/{id}")
 async def user(id: int):
     return search_user(id)
 
@@ -42,7 +42,7 @@ def search_user(id: int):
     except:
         return "{Error: No se ha encontrado el usuario}"
     
-@app.post("/user/", response_model= User, status_code=201)
+@router.post("/user/", response_model= User, status_code=201)
 async def user(user: User): 
     if type (search_user(user.id)) == User:
        raise HTTPException(status_code=204, detail="Error: El usuario ya existe")
@@ -52,7 +52,7 @@ async def user(user: User):
         return user
 
 
-@app.put("/user/")
+@router.put("/user/")
 async def user(user: User):
     found = False
     for index, saved_user in enumerate(users_list):
@@ -65,7 +65,7 @@ async def user(user: User):
     else:
         return user
 
-@app.delete("/user/{id}")
+@router.delete("/user/{id}")
 async def user(id: int):
     found = False
     for index, saved_user in enumerate(users_list):
