@@ -31,17 +31,23 @@ async def users():
 async def user(id: int):
     return search_user(id)
 
-def search_user(id: int):
-    users = filter(lambda user: user.id == id, users_list)
+
+def search_user(email: str):
+    return ""
+
+def search_user_by_email(email: str):
+    # users = filter(lambda user: user.id == id, users_list)
     try:
-        return list(users)[0]
+        user = db_client.users.find_one({"email":email})
+        print(user)
+        return User(**user_schema(user))
     except:
         return "{Error: No se ha encontrado el usuario}"
     
 @router.post("/", response_model= User, status_code=201)
 async def user(user: User): 
-    # if type (search_user(user.id)) == User:
-    #    raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Error: El usuario ya existe")
+    if type (search_user_by_email(user.email)) == User:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Error: El usuario ya existe")
     #    #raise HTTPException(status_code=204, detail="Error: El usuario ya existe")
     # else:
     #     users_list.append(user)
