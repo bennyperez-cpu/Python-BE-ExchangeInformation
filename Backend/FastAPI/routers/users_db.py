@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException, APIRouter, status
 from db.models.user import User
 from db.client import db_client
-from db.schemas.user import user_schema
+from db.schemas.user import user_schema, users_schema
+from bson import ObjectId
+from pydantic import BaseModel
+# from typing import Any, List, Union
 
 router = APIRouter(prefix="/userdb",
                     responses={status.HTTP_404_NOT_FOUND: {"messaje": "No encontrado"}},
@@ -23,17 +26,13 @@ async def usersjson():
             {"name": "Hammer", "surname": "Vásquez", "url": "https://sites.google.com/pucp.pe/bennyperez/", "age":37},
             {"name": "Jessika", "surname": "Medina", "url": "https://www.linkedin.com/in/jessika-milena-medina-suarez/", "age":36}]
 
-@router.get("/")
-async def users():
-    return users_list
-
-@router.get("/{id}")
-async def user(id: int):
-    return search_user(id)
-
-
-def search_user(email: str):
-    return ""
+def search_user(field: str, key):
+    try:
+        user = db_client.users.find_one({"email":key})
+        print(user)
+        return User(**user_schema(user))
+    except:
+        return "{Error: No se ha encontrado el usuario}"
 
 def search_user_by_email(email: str):
     # users = filter(lambda user: user.id == id, users_list)
@@ -43,10 +42,22 @@ def search_user_by_email(email: str):
         return User(**user_schema(user))
     except:
         return "{Error: No se ha encontrado el usuario}"
+
+@router.get("/", response_model = list[User])
+async def users():
+    return users_schema(db_client.users.find())
+
+@router.get("/{id}") #Path
+async def user(id: str):
+    return search_user("_id", ObjectId(id))
+
+@router.get("/") #Query
+async def user(id: int):
+    return search_user("_id", ObjectId(id))
     
 @router.post("/", response_model= User, status_code=201)
 async def user(user: User): 
-    if type (search_user_by_email(user.email)) == User:
+    if type (search_user("email", user.email)) == User:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Error: El usuario ya existe")
     #    #raise HTTPException(status_code=204, detail="Error: El usuario ya existe")
     # else:
@@ -56,6 +67,7 @@ async def user(user: User):
     
     del user_dict["id"]
     id = db_client.users.insert_one(user_dict).inserted_id
+    print(id)
     new_user = user_schema(db_client.users.find_one({"_id":id}))
     return User(**new_user)
 
