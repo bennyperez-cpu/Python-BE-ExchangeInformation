@@ -28,7 +28,7 @@ async def usersjson():
 
 def search_user(field: str, key):
     try:
-        user = db_client.users.find_one({"email":key})
+        user = db_client.users.find_one({field: key})
         print(user)
         return User(**user_schema(user))
     except:
@@ -97,10 +97,6 @@ async def user(id: int):
         return {"Error": "No se ha eliminado el usuario"}
     else:
         return {"El usuario se ha eliminado satisfactoriamente"}   
-
-
-
-
 
 #Url local: http://127.0.0.1:8000/url
 
