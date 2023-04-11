@@ -18,7 +18,7 @@ router = APIRouter(prefix="/userdb",
 #Entidad user
 
 
-users_list = []
+
 
 @router.get("/usersjson")
 async def usersjson():
@@ -74,24 +74,21 @@ async def user(user: User):
 
 @router.put("/")
 async def user(user: User):
-    found = False
-    for index, saved_user in enumerate(users_list):
-        if saved_user.id == user.id:
-            users_list[index] = user
-            found = True
+    try:
+        user_dict = dict(user)
+        del user_dict["id"]
+        found = db_client.users.find_one_and_replace(
+            {"_id": ObjectId(user.id)}, user_dict)
 
-    if not found:
+    except:
         return {"Error": "No se ha actualizado el usuario"}
-    else:
-        return user
+    
+    return search_user("_id", ObjectId(user.id))
+
 
 @router.delete("/{id}")
-async def user(id: int):
-    found = False
-    for index, saved_user in enumerate(users_list):
-        if saved_user.id == id:
-            del users_list[index]
-            found = True
+async def user(id: str):
+    found = db_client.users.find_one_and_delete({"_id": ObjectId(id)})
 
     if not found:
         return {"Error": "No se ha eliminado el usuario"}
