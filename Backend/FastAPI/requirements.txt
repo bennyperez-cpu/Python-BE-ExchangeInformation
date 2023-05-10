@@ -3,3 +3,6 @@ python-jose
 passlib
 pymongo
 python-multipart
+fastapi[all]
+pydantic
+uvicorn
